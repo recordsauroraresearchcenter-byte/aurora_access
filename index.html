@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Aurora Research Center</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Courier New", monospace;
+    color: #9ff;
+    overflow: hidden;
+}
+
+/* ===== TELAS ===== */
+#login-screen, #post-login {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#login-screen {
+    display: flex;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out;
+}
+
+#post-login {
+    background: url("https://i.imgur.com/igLNdBD.png") no-repeat center center fixed;
+    background-size: cover;
+    padding: 40px;
+}
+
+/* ===== LOGIN BOX ===== */
+.login-box {
+    background: rgba(0,0,0,0.85);
+    border: 1px solid #003366;
+    padding: 30px;
+    width: 320px;
+    box-shadow: 0 0 25px #003366;
+    text-align: center;
+    z-index: 2;
+}
+
+#title {
+    font-size: 22px;
+    animation: colorShift 6s infinite;
+}
+
+@keyframes colorShift {
+    0%   { color: #003366; }
+    25%  { color: #00ffff; }
+    50%  { color: #00ff66; }
+    75%  { color: #ff3333; }
+    100% { color: #003366; }
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    font-size: 12px;
+    text-align: left;
+}
+
+input {
+    width: 100%;
+    background: black;
+    border: 1px solid #003366;
+    color: #0ff;
+    padding: 8px;
+    margin-top: 5px;
+}
+
+button {
+    margin-top: 20px;
+    width: 100%;
+    background: #003366;
+    color: #9ff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.warning {
+    font-size: 10px;
+    margin-top: 15px;
+    opacity: 0.6;
+}
+
+/* ===== PÓS LOGIN ===== */
+.panel {
+    background: rgba(0,0,0,0.8);
+    border: 1px solid #0ff;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.redacted {
+    background: black;
+    color: black;
+    padding: 5px;
+}
+
+a {
+    color: #0ff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* ===== TEXTOS CAÓTICOS ===== */
+.glitch-text {
+    position: absolute;
+    color: #0ff;
+    font-size: 12px;
+    opacity: 0.7;
+    animation: flicker 1.5s infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes flicker {
+    0% { opacity: 0; transform: translateX(0); }
+    30% { opacity: 1; }
+    60% { opacity: 0.4; transform: translateX(-2px); }
+    100% { opacity: 0; transform: translateX(2px); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== ÁUDIOS ===== -->
+<audio id="audioLogin" loop>
+    <source src="ambient_login.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="audioInternal" loop>
+    <source src="ambient_internal.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="audioError">
+    <source src="error.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="audioSuccess">
+    <source src="success.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+    <div class="login-box">
+        <h1 id="title">AURORA ACCESS</h1>
+        <p class="warning">Restricted Research Network</p>
+
+        <label>USERNAME</label>
+        <input type="text" value="TENEBRIS" disabled>
+
+        <label>ACCESS KEY</label>
+        <input type="password" id="password">
+
+        <button onclick="login()">ENTER</button>
+
+        <p class="warning">
+            Unauthorized access will be logged.<br>
+            Observation is ongoing.<br><br>
+            forgot password system status contact admin
+        </p>
+    </div>
+</div>
+
+<!-- ===== PÓS LOGIN ===== -->
+<div id="post-login">
+    <div class="panel">
+        <h2>Welcome, <span id="username">TENEBRIS</span></h2>
+        <p>Status: <b>ACCESS GRANTED</b></p>
+    </div>
+
+    <div class="panel">
+        <h3>Research Files</h3>
+        <p>ARC_CASE-000666_CLASSIFIED: <span class="redacted">REDACTED</span></p>
+        <p>ARC_CONFIDENTIAL_REPORT: <span class="redacted">REDACTED</span></p>
+
+        <p>
+            <a href="https://drive.google.com/file/d/1Vv5K5tABwfNHIV1Lb1NjR-f-6lfmS-VA/view?usp=drive_link" target="_blank">
+                Download Archived File
+            </a>
+        </p>
+    </div>
+</div>
+
+<script>
+/* ===== FUNDOS LOGIN ===== */
+const loginBackgrounds = [
+    "https://i.imgur.com/M4gtn8W.png",
+    "https://i.imgur.com/QHZgFcl.png",
+    "https://i.imgur.com/12G8gnO.png",
+    "https://i.imgur.com/XSspzEz.png"
+];
+
+let bgIndex = 0;
+const loginScreen = document.getElementById("login-screen");
+
+function rotateBackground() {
+    loginScreen.style.backgroundImage = `url('${loginBackgrounds[bgIndex]}')`;
+    bgIndex = (bgIndex + 1) % loginBackgrounds.length;
+}
+
+rotateBackground();
+setInterval(rotateBackground, 3000);
+
+/* ===== LOGIN ===== */
+function login() {
+    const senha = document.getElementById("password").value;
+
+    const audioLogin = document.getElementById("audioLogin");
+    const audioInternal = document.getElementById("audioInternal");
+    const audioError = document.getElementById("audioError");
+    const audioSuccess = document.getElementById("audioSuccess");
+
+    if (senha === "AURORA.NULL.666") {
+
+        audioLogin.pause();
+        audioError.pause();
+
+        audioSuccess.currentTime = 0;
+        audioSuccess.play();
+
+        setTimeout(() => {
+            audioInternal.play();
+        }, 800);
+
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("post-login").style.display = "block";
+
+        startUsernameGlitch();
+        startCreepyTexts();
+
+    } else {
+        audioError.currentTime = 0;
+        audioError.play();
+        alert("Credenciais rejeitadas.\nAlgo permaneceu aberto.");
+    }
+}
+
+/* ===== NOME ALTERNANDO ===== */
+function startUsernameGlitch() {
+    const user = document.getElementById("username");
+    setInterval(() => {
+        user.textContent = (user.textContent === "TENEBRIS") ? "DR.XXXXXX" : "TENEBRIS";
+    }, 1200);
+}
+
+/* ===== TEXTOS CAÓTICOS ===== */
+const creepyTexts = [
+    "você não é ele",
+    "o que está fazendo?",
+    "eu confiava em você",
+    "por favor pare...",
+    "01001000 01000101 01001100 01010000",
+    "... --- ...",
+    "-- .- -. - . -- .... .-",
+    "00110110 00110110 00110110",
+    "o sistema está observando a si mesmo"
+];
+
+function startCreepyTexts() {
+    setInterval(() => {
+        const text = document.createElement("div");
+        text.className = "glitch-text";
+        text.textContent = creepyTexts[Math.floor(Math.random() * creepyTexts.length)];
+        text.style.left = Math.random() * 90 + "%";
+        text.style.top = Math.random() * 90 + "%";
+        document.body.appendChild(text);
+
+        setTimeout(() => text.remove(), 2000);
+    }, 600);
+}
+
+/* ===== INICIALIZAÇÃO ===== */
+window.onload = () => {
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("audioLogin").play();
+};
+</script>
+
+</body>
+</html>
